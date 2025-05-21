@@ -2,12 +2,15 @@ import puppeteer from "puppeteer";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
 
   const { searchParams } = new URL(req.url);
   const url = searchParams.get("url");
-  const count = parseInt(searchParams.get("count") || "0", 10); // Number of times to click "Load More"
+  const count = parseInt(searchParams.get("count") || "0", 10);
 
   console.log(count)
 
