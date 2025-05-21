@@ -1,10 +1,9 @@
 # Use a lightweight Node.js image
 FROM node:23-slim
 
-# Install Chromium and required dependencies
+# Install Chromium dependencies
 RUN apt-get update && apt-get install -y \
     wget \
-    gnupg \
     ca-certificates \
     fonts-liberation \
     libappindicator3-1 \
@@ -25,26 +24,25 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Set environment variable so Puppeteer knows where Chromium is
+# Set Puppeteer path for runtime
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Set working directory
 WORKDIR /app
 
-# Install Bun
-RUN npm install -g bun
-
-# Copy package files
+# Copy deps & install
 COPY package.json bun.lockb ./
+RUN npm install -g bun && bun install
 
-# Install dependencies
-RUN bun install
-
-# Copy the rest of the app
+# Copy rest of the app
 COPY . .
 
-# Expose the port (Next.js or custom)
+# Build your Next.js app
+RUN bunx next build
+
+# Expose app port
 EXPOSE 3000
 
-# Start your app
-CMD ["bun", "start"]
+# Start the app
+CMD ["bunx", "next", "start"]
